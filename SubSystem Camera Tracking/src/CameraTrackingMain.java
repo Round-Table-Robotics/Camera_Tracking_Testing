@@ -21,12 +21,11 @@ public static void main(String[] args) {
 		//Sorted Data From Pixy	
 			String[][] objects = new String[setsofdata][amountofbytes];
 		//Converted Data From Pixy	
-		double[][] targets = new double[setsofdata][amountofbytes];
+		double[][] targets = new double[setsofdata][amountofvariables];
 	//Find Best Target
 		double numdist = -1; //Distance between numbers and closest
-		int[] best = new int[4]; //x, y, height, width
-		int[] bestcount = new int[4];
-		int besttarget = -1;
+		int[] bestcount = new int[setsofdata];
+		int besttarget = 0;
 		double[] target = new double[amountofvariables];
 	//Targeting System Variables
 		boolean fixed = false,xgood = false,ygood = false,hgood = false,wgood = false;
@@ -45,8 +44,8 @@ public static void main(String[] args) {
 			//View is 640 x 400
 			want[3] = 200; //X Center
 			want[4] = 320; //Y Center
-			want[6] = 80; //Height
-			want[5] = 40; //Width		
+			want[5] = 40; //Width	
+			want[6] = 80; //Height	
 		
 		//Range That Goal Can Be within
 		//For Example
@@ -58,12 +57,13 @@ public static void main(String[] args) {
 			//Y Center
 			highrange[4] = 5; //Must Be Positive or 0
 			lowrange[4] = -5; //Must Be Negative or 0
-			//Height
-			highrange[6] = 5; //Must Be Positive or 0
-			lowrange[6] = -5; //Must Be Negative or 0
 			//Width
 			highrange[5] = 5; //Must Be Positive or 0
 			lowrange[5] = -5; //Must Be Negative or 0
+			//Height
+			highrange[6] = 5; //Must Be Positive or 0
+			lowrange[6] = -5; //Must Be Negative or 0
+
 	
 		//Note: Want, High Range and Low Range should probably be able to be changed from the SmartDash Board	
 			
@@ -97,7 +97,7 @@ public static void main(String[] args) {
 		6      height of object
 	 */
 		for(int i = 0; i < (amountofbytes * setsofdata); i++){
-			if(i % 14 == 0 || i == 0){
+			if(i % 14 == 0){
 				data[i] = blocksync;
 				//System.out.println("Data["+i+"] = "+data[i]);
 			}
@@ -107,24 +107,25 @@ public static void main(String[] args) {
 			}
 		}
 		
+		//See How hard the processes takes on different systems
+		long startTime = System.currentTimeMillis();
+		
 	//while(!shot && trigger){ //Runs until the trigger is let go or ball is shot 
 		//Decoder
 		//Takes in all Data From Pixy and Organizes it for Conversion
-		objects = decoder.decode(amountofbytes, blocksync, data, syncbyte, objects); 
+		objects = decoder.decode(setsofdata, amountofbytes, blocksync, data, syncbyte, objects); 
 		//Convert
 		//Takes in the objects and converts them from strings to bytes to ints into usable numbers 
-		targets = decoder.convert(amountofbytes, besttarget, objects, targets); 
-		for(int ii = 0; ii < setsofdata; ii++){
-			for(int i=0; i< amountofbytes; i++){
-				System.out.println(targets[ii][i]);
-			}
-		}
+		targets = decoder.convert(amountofbytes, setsofdata, amountofvariables, objects, targets); 
 		//Filter Targets
 		// Takes in the Use able numbers and outputs the correct target will also sort out other targets
-		target = filter.filter(numdist, target, targets, want, setsofdata, best, bestcount, besttarget, amountofvariables); 
+		target = filter.filter(numdist, target, targets, want, setsofdata, bestcount, besttarget, amountofvariables); 
 		//Align to Target
 		//Takes in the Correct Target and Lines the robot up to shoot and shoots
-		shot = align.align(shot, fixed, xgood, ygood, hgood, wgood, auto, strafe, oldwidth, target, want, highrange, lowrange, LeftMotor, RightMotor);  
+		shot = align.align(shot, fixed, xgood, ygood, hgood, wgood, auto, strafe, oldwidth, target, want, highrange, lowrange, LeftMotor, RightMotor);
+		long endTime   = System.currentTimeMillis();
+		long totalTime = endTime - startTime;
+		System.out.println("Time to Complete: Milliseconds: "+totalTime);
 	//}	
 			
 		

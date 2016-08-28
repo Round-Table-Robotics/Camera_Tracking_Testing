@@ -104,6 +104,7 @@ public boolean align(boolean shot, boolean fixed, boolean xgood, boolean ygood,b
 				shot = true;
 			}
 		}
+	System.out.println("LeftMotor: "+LeftMotor+" RightMotor: "+RightMotor);	
 	return shot;	
 }
 }
